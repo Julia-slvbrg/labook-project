@@ -23,4 +23,10 @@ export abstract class BaseDatabase{
     }
 
     abstract TABLE_NAME: string;
+    protected async findAll():Promise<any>{
+        return await BaseDatabase.connection(this.TABLE_NAME)
+    };
+    protected async findById(id:string):Promise<any>{
+        return await BaseDatabase.connection(this.TABLE_NAME).where({id})
+    }
 }
