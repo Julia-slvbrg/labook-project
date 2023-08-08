@@ -4,9 +4,10 @@ CREATE TABLE IF NOT EXISTS users(
     name TEXT NOT NULL,
     email TEXT NOT NULL,
     password TEXT NOT NULL,
-    role TEXT NOT NULL,
+    user_role VARCHAR(6) NOT NULL,
     created_at TEXT DEFAULT(DATETIME('now', 'localtime')) NOT NULL
 );
+DROP TABLE users;
 
 CREATE TABLE IF NOT EXISTS posts(
     id TEXT PRIMARY KEY UNIQUE NOT NULL,
@@ -15,11 +16,13 @@ CREATE TABLE IF NOT EXISTS posts(
     likes INTEGER NOT NULL,
     dislikes INTEGER NOT NULL,
     created_at TEXT DEFAULT(DATETIME('now', 'localtime')) NOT NULL,
-    upadted_at TEXT DEFAULT(DATETIME('now', 'localtime')) NOT NULL,
+    updated_at TEXT DEFAULT(DATETIME('now', 'localtime')) NOT NULL,
     FOREIGN KEY (creator_id) REFERENCES users(id)
         ON UPDATE CASCADE 
         ON DELETE CASCADE
 );
+
+DROP TABLE posts;
 
 CREATE TABLE IF NOT EXISTS likes_dislikes(
     user_id TEXT NOT NULL,
@@ -32,3 +35,7 @@ CREATE TABLE IF NOT EXISTS likes_dislikes(
         ON UPDATE CASCADE
         ON DELETE CASCADE
 );
+
+INSERT INTO users(id, name, email, password, user_role)
+VALUES  ('u001', 'Ana Catarina', 'titi@gmail.com', 'titi123!', 'ADMIN'),
+        ('u002', 'Gabo Gabolino', 'gabo@gmail.com', 'gabo123!', 'USER');
