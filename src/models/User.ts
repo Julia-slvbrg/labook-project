@@ -37,5 +37,25 @@ export class User{
     }
     public getCreatedAt():string{
         return this.createdAt
+    };
+
+    public userToDBModel():UserDB{
+        return{
+            id: this.id,
+            name: this.name,
+            email: this.email,
+            password: this.password,
+            user_role: this.role,
+            created_at: this.createdAt
+        }
     }
-}
+};
+
+export interface UserDB{
+    id: string,
+    name: string,
+    email: string,
+    password: string,
+    user_role: string,
+    created_at: string
+};
