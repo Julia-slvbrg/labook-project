@@ -11,4 +11,7 @@ app.listen(3003, () => {
     console.log(`Server running on port ${3003}.`)
 });
 
+//USERS
 app.use('/users', userRouter)
+
+//POSTS
