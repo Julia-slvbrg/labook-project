@@ -1,110 +1,71 @@
 import { UserDatabase } from "../../database/users/UserDatabase"
+import { GetUsersInputDTO, GetUsersOutputDTO } from "../../dtos/user/getUsers.dto";
+import { LoginOutputDTO } from "../../dtos/user/login.dto";
+import { SignupInputDTO, SignupOutputDTO } from "../../dtos/user/signup.dto";
 import { BadRequestError } from "../../errors/BadRequestError";
 import { NotFoundError } from "../../errors/NotFoundError";
 import { User, UserDB } from "../../models/User";
+import { IdGenerator } from "../../services/idGenerator";
+import { TokenManager, TokenPayload } from "../../services/tokenManager";
 import { USER_ROLES} from "../../types";
 
 export class UserBusiness{
     constructor(
-        private userDatabase:  UserDatabase
+        private userDatabase:  UserDatabase,
+        private idGenerator: IdGenerator,
+        private tokenManager: TokenManager
     ){}
 
-    public getUsers = async (q:string|undefined):Promise<User[]> =>{ 
+    public getUsers = async (input:GetUsersInputDTO):Promise<GetUsersOutputDTO[]> =>{ 
+        const { q, token } = input;
+
         const usersDB = await this.userDatabase.findUsers(q);
 
-        const users: User[] = usersDB.map((userDB)=> new User(
-            userDB.id,
-            userDB.name,
-            userDB.email,
-            userDB.password,
-            userDB.user_role,
-            userDB.created_at
-        ));
+        const users: GetUsersOutputDTO[] = usersDB.map((userDB)=> {
+            return{
+                id: userDB.id,
+                name: userDB.name,
+                email: userDB.email,
+                role: userDB.user_role,
+                createdAt: userDB.created_at
+            }
+        }
+        );
 
         return users
     };
 
-    public signUp = async (input:any):Promise<any> => {
-        const {id, name, email, password, role} = input;
-
-        if(id){
-            if(typeof id !== 'string'){
-                throw new BadRequestError('"id" must be a string.')
-            };
-            if(id[0] !== 'u'){
-                throw new BadRequestError('"id" must start with the letter "u".')
-            }
-        }else{
-            throw new BadRequestError('Inform user "id"')
-        };
-
-        if(name){
-            if(typeof name !== 'string' || name.length<0 || name === " "){
-                throw new BadRequestError('"name" must be a string.')
-            };
-        }else{
-            throw new BadRequestError('Inform users "name"')
-        };
-
-        if(email){
-            if(!email.match("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$")){
-                throw new BadRequestError('Email invalid. Try again.')
-            }
-        }else{
-            throw new BadRequestError('Inform user "email"')
-        };
-
-        if(password){
-            if(!password.match(/^(?=.*[A-Z])(?=.*[!#@$%&])(?=.*[0-9])(?=.*[a-z]).{6,10}$/g)){
-                throw new BadRequestError('Password invalid. It must have from six to ten characters, with uppercase and lowercase letters and one special character. Try again.')
-            }
-        }else{
-            throw new BadRequestError('Inform user "password"')
-        };
-
-        if(role){
-            if(
-                role !== USER_ROLES.NORMAL &&
-                role !== USER_ROLES.ADMIN
-            ){
-                throw new BadRequestError('Inform if the user role is "NORMAL" or "ADMIN".')
-            }
-        }else{
-            throw new BadRequestError('Inform the user role.')
-        };
+    public signUp = async (input:SignupInputDTO):Promise<SignupOutputDTO> => {
+        const {name, email, password} = input;
         
-        const checkUserId = await this.userDatabase.findUserById(id);
-        console.log(checkUserId)
         const checkUserEmail = await this.userDatabase.findEmail(email);
-        
-        if(checkUserId){
-            throw new BadRequestError('The "id" is already being used.')
-        };
        
         if(checkUserEmail){
             throw new BadRequestError('The "email" is already being used.')
         };
 
         const newUser = new User(
-            id,
+            this.idGenerator.generateId(),
             name,
             email,
             password,
-            role,
+            USER_ROLES.NORMAL,
             new Date().toISOString()
         );
 
         await this.userDatabase.createUser(newUser.userToDBModel());
 
-        const output = {
-            message: 'User registered',
-            user: {
+        const token = this.tokenManager.createToken(
+            {
                 id: newUser.getId(),
-                name: newUser.getName(),
-                email: newUser.getEmail(),
                 role: newUser.getRole(),
-                createdAt: newUser.getCreatedAt()
+                name: newUser.getName()
             }
+        )
+
+        const output: SignupOutputDTO = {
+            message: 'User registered',
+            token: token
         };
 
         console.log(output)
@@ -112,17 +73,33 @@ export class UserBusiness{
         return output
     };
 
-    public login = async (input:any):Promise<any> => {
+    public login = async (input:any):Promise<LoginOutputDTO> => {
         const {email, password} = input;
 
-        const checkUserEmail = await this.userDatabase.findEmail(email);
+        const checkUser = await this.userDatabase.findEmail(email);
 
-        if(!checkUserEmail){
+        if(!checkUser){
             throw new BadRequestError('User not registerd.')
         };
-        //validação da senha
 
-        //resto do código
+        if(password !== checkUser.password){
+            throw new BadRequestError('Incorrect "email" or "password".')
+        };
+
+        const payload:TokenPayload = {
+            id: checkUser.id,
+            role: checkUser.user_role,
+            name: checkUser.name
+        };
+
+        const token = this.tokenManager.createToken(payload);
+
+        const output: LoginOutputDTO = {
+            message: 'User successfully loged.',
+            token: token
+        };
+
+        return output
     }
 
 }
