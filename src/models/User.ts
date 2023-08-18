@@ -1,10 +1,12 @@
+import { USER_ROLES } from "../types"
+
 export class User{
     constructor(
         private id: string,
         private name: string,
         private email: string,
         private password: string,
-        private role: string,
+        private role: USER_ROLES,
         private createdAt: string
     ){};
 
@@ -29,10 +31,10 @@ export class User{
     public setPassword(password:string):void{
         this.password = password
     };
-    public getRole():string{
+    public getRole():USER_ROLES {
         return this.role
     };
-    public setRole(role:string):void{
+    public setRole(role:USER_ROLES):void{
         this.role = role
     }
     public getCreatedAt():string{
@@ -56,6 +58,6 @@ export interface UserDB{
     name: string,
     email: string,
     password: string,
-    user_role: string,
+    user_role: USER_ROLES,
     created_at: string
 };
