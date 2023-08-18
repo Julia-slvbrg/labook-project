@@ -14,4 +14,3 @@ export interface TokenPayload{
     name: string,
     role: USER_ROLES
 }
-

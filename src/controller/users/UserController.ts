@@ -56,6 +56,8 @@ export class UserController{
                 password: req.body.email
             };
 
+            await this.userBusiness.login(input);
+            
             res.status(201).send()
         } catch (error) {
             console.log(error);

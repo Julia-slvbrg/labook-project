@@ -1,4 +1,4 @@
-export class Posts{
+export class Post{
     constructor(
         private id: string,
         private creatorId: string,
@@ -47,6 +47,18 @@ export class Posts{
     };
     public setUpdatedAt(updatedAt:string){
         this.updatedAt = updatedAt
+    };
+
+    public postToDBModel():PostDB{
+        return{
+            id: this.id,
+            creator_id: this.creatorId,
+            content: this.content,
+            likes: this.likes,
+            dislikes: this.dislikes,
+            created_at: this.createdAt,
+            updated_at: this.updatedAt
+        }
     }
 };
 
