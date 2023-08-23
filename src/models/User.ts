@@ -1,5 +1,3 @@
-import { USER_ROLES } from "../types"
-
 export class User{
     constructor(
         private id: string,
@@ -60,4 +58,9 @@ export interface UserDB{
     password: string,
     user_role: USER_ROLES,
     created_at: string
+};
+
+export enum USER_ROLES{
+    NORMAL = 'NORMAL',
+    ADMIN = 'ADMIN'
 };

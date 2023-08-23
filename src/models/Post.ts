@@ -77,3 +77,24 @@ export interface EditedPostDB{
     content: string,
     updated_at: string
 }
+
+export interface GetPostDB{
+    id: string,
+    content: string,
+    likes: number,
+    dislikes: number,
+    createdAt: string,
+    updatedAt: string,
+    creatorId: string,
+    creatorName: string
+}
+
+export interface GetPostByIdDB{
+    id: string,
+    creatorId: string,
+    content: string,
+    likes: number,
+    dislikes: number,
+    createdAt: string,
+    updatedAt: string
+}

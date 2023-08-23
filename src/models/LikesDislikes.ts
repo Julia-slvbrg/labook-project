@@ -23,4 +23,10 @@ export class LikesDislikes{
     public setLike(like:number){
         this.like = like
     }
-}
+};
+
+export interface LikesDislikesDB{
+    user_id: string,
+    post_id: string,
+    like: number
+};

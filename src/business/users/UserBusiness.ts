@@ -3,11 +3,9 @@ import { GetUsersInputDTO, GetUsersOutputDTO } from "../../dtos/user/getUsers.dt
 import { LoginOutputDTO } from "../../dtos/user/login.dto";
 import { SignupInputDTO, SignupOutputDTO } from "../../dtos/user/signup.dto";
 import { BadRequestError } from "../../errors/BadRequestError";
-import { NotFoundError } from "../../errors/NotFoundError";
-import { User, UserDB } from "../../models/User";
+import { USER_ROLES, User } from "../../models/User";
 import { IdGenerator } from "../../services/idGenerator";
 import { TokenManager, TokenPayload } from "../../services/tokenManager";
-import { USER_ROLES} from "../../types";
 
 export class UserBusiness{
     constructor(
@@ -29,8 +27,7 @@ export class UserBusiness{
                 role: userDB.user_role,
                 createdAt: userDB.created_at
             }
-        }
-        );
+        });
 
         return users
     };
@@ -61,14 +58,12 @@ export class UserBusiness{
                 role: newUser.getRole(),
                 name: newUser.getName()
             }
-        )
+        );
 
         const output: SignupOutputDTO = {
             message: 'User registered',
             token: token
         };
-
-        console.log(output)
 
         return output
     };
