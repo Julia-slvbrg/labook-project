@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { USER_ROLES } from "../types";
+import { USER_ROLES } from "../models/User";
 
 dotenv.config();
 
