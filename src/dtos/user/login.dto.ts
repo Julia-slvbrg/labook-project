@@ -25,8 +25,5 @@ export const LoginSchema = z.object({
             required_error: '"password" is required',
             invalid_type_error: '"password" must be a string'
         }
-    ). refine(
-        (value) => /^(?=.*[A-Z])(?=.*[!#@$%&])(?=.*[0-9])(?=.*[a-z]).{6,10}$/g.test(value),
-        'Invalid password. It must have from six to ten characters, with uppercase and lowercase letters and one special character. Try again.'
     )
 }).transform(data => data as LoginInputDTO)

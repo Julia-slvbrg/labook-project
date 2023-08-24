@@ -62,7 +62,7 @@ export class UserController{
         try {
             const input = LoginSchema.parse({
                 email: req.body.email, 
-                password: req.body.email
+                password: req.body.password
             });
 
             const output = await this.userBusiness.login(input);

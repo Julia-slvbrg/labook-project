@@ -1,3 +1,4 @@
+import { log } from "console";
 import { PostDatabase } from "../../database/posts/PostDatabase";
 import { CreatePostInputDTO, CreatePostOutputDTO } from "../../dtos/post/createPost.dto";
 import { DeletePostInputDTO } from "../../dtos/post/deletePost.dto";
@@ -5,10 +6,10 @@ import { GetPostInputDTO, GetPostOutputDTO } from "../../dtos/post/getPost.dto";
 import { UpdatePostInputDTO, UpdatePostOutputDTO } from "../../dtos/post/updatePost.dto";
 import { BadRequestError } from "../../errors/BadRequestError";
 import { NotFoundError } from "../../errors/NotFoundError";
-import { EditedPostDB, Post } from "../../models/Post";
+import { GetPostByIdDB, Post } from "../../models/Post";
 import { USER_ROLES } from "../../models/User";
-import { IdGenerator } from "../../services/idGenerator";
-import { TokenManager } from "../../services/tokenManager";
+import { IdGenerator } from "../../services/IdGenerator";
+import { TokenManager } from "../../services/TokenManager";
 
 export class PostBusiness{
     constructor(
@@ -73,6 +74,7 @@ export class PostBusiness{
 
             }
         });
+        
 
         return result
     };
@@ -86,24 +88,24 @@ export class PostBusiness{
             throw new BadRequestError('"token" is required.')
         };
 
-        const checkPostId = await this.postDatabase.getPostById(id);
+        const checkPostId = await this.postDatabase.getPostById(id);       
 
         if(!checkPostId){
             throw new NotFoundError('Post "id" not found')
         };
 
 
-        if(payload.id !== checkPostId.creatorId){
+        if(payload.id !== checkPostId.creator_id){
             throw new BadRequestError('Only the creator of the post can edit it.')
-        };
+        };        
 
         const editedPost = new Post(
             checkPostId.id,
-            checkPostId.creatorId,
+            checkPostId.creator_id,
             checkPostId.content,
             checkPostId.likes,
             checkPostId.dislikes,
-            checkPostId.createdAt,
+            checkPostId.created_at,
             new Date().toISOString()
         );
 
@@ -133,7 +135,7 @@ export class PostBusiness{
             throw new NotFoundError('Post "id" not found.')
         };
 
-        if(payload.id !== checkPostId.creatorId || payload.role !== USER_ROLES.ADMIN){
+        if(payload.id !== checkPostId.creator_id && payload.role !== USER_ROLES.ADMIN){
             throw new BadRequestError('Only the creator of the post, or an ADMIN user, can delete it.')
         };
 

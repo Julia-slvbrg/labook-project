@@ -3,19 +3,32 @@ import { GetUsersInputDTO, GetUsersOutputDTO } from "../../dtos/user/getUsers.dt
 import { LoginOutputDTO } from "../../dtos/user/login.dto";
 import { SignupInputDTO, SignupOutputDTO } from "../../dtos/user/signup.dto";
 import { BadRequestError } from "../../errors/BadRequestError";
+import { NotFoundError } from "../../errors/NotFoundError";
 import { USER_ROLES, User } from "../../models/User";
-import { IdGenerator } from "../../services/idGenerator";
-import { TokenManager, TokenPayload } from "../../services/tokenManager";
+import { HashManager } from "../../services/HashManager";
+import { IdGenerator } from "../../services/IdGenerator";
+import { TokenManager, TokenPayload } from "../../services/TokenManager";
 
 export class UserBusiness{
     constructor(
         private userDatabase:  UserDatabase,
         private idGenerator: IdGenerator,
-        private tokenManager: TokenManager
+        private tokenManager: TokenManager,
+        private hashManager: HashManager
     ){}
 
     public getUsers = async (input:GetUsersInputDTO):Promise<GetUsersOutputDTO[]> =>{ 
         const { q, token } = input;
+
+        const payload = this.tokenManager.getPayload(token);
+
+        if(!payload){
+            throw new BadRequestError('"token" is required.')
+        };
+
+        if(payload.role !== USER_ROLES.ADMIN){
+            throw new BadRequestError('Only ADMIN users can search for users.')
+        };
 
         const usersDB = await this.userDatabase.findUsers(q);
 
@@ -41,11 +54,13 @@ export class UserBusiness{
             throw new BadRequestError('The "email" is already being used.')
         };
 
+        const hashedPassword = await this.hashManager.hash(password)
+
         const newUser = new User(
             this.idGenerator.generateId(),
             name,
             email,
-            password,
+            hashedPassword,
             USER_ROLES.NORMAL,
             new Date().toISOString()
         );
@@ -69,22 +84,33 @@ export class UserBusiness{
     };
 
     public login = async (input:any):Promise<LoginOutputDTO> => {
-        const {email, password} = input;
+        const { email, password } = input;
 
-        const checkUser = await this.userDatabase.findEmail(email);
+        const checkUserDB = await this.userDatabase.findEmail(email);
 
-        if(!checkUser){
-            throw new BadRequestError('User not registerd.')
+        if(!checkUserDB){
+            throw new NotFoundError('"email" not found.')
+        };        
+
+        const isPasswordValid = await this.hashManager.compare(password, checkUserDB.password);
+
+        if(!isPasswordValid){
+            throw new BadRequestError('"email" or "password" invalid.')
         };
 
-        if(password !== checkUser.password){
-            throw new BadRequestError('Incorrect "email" or "password".')
-        };
+        const user = new User(
+            checkUserDB.id,
+            checkUserDB.name,
+            checkUserDB.email,
+            checkUserDB.password,
+            checkUserDB.user_role,
+            checkUserDB.created_at
+        )
 
         const payload:TokenPayload = {
-            id: checkUser.id,
-            role: checkUser.user_role,
-            name: checkUser.name
+            id: user.getId(),
+            role: user.getRole(),
+            name: user.getName()
         };
 
         const token = this.tokenManager.createToken(payload);

@@ -39,3 +39,11 @@ CREATE TABLE IF NOT EXISTS likes_dislikes(
 INSERT INTO users(id, name, email, password, user_role)
 VALUES  ('u001', 'Ana Catarina', 'titi@gmail.com', 'titi123!', 'ADMIN'),
         ('u002', 'Gabo Gabolino', 'gabo@gmail.com', 'gabo123!', 'USER');
+
+DROP TABLE likes_dislikes;
+DROP TABLE posts;
+DROP TABLE users;
+
+UPDATE users
+SET user_role = 'ADMIN'
+WHERE id = 'b9214f03-b656-4367-b244-f8e348ded26e';
