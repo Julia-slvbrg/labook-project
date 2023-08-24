@@ -1,4 +1,4 @@
-import { EditedPostDB, GetPostByIdDB, GetPostDB, PostDB } from "../../models/Post"
+import { GetPostByIdDB, GetPostDB, Post, PostDB } from "../../models/Post"
 import { BaseDatabase } from "../BaseDatabase"
 
 export class PostDatabase extends BaseDatabase{
@@ -11,15 +11,24 @@ export class PostDatabase extends BaseDatabase{
 
     public async getPost():Promise<GetPostDB[]>{
         const post: GetPostDB[] = await BaseDatabase.connection(this.TABLE_NAME)
-            .select('p.id', 'p.content', 'p.likes', 'p.dislikes', 'p.createdAt', 'p.updatedAt', 'p.creatorId', 'u.name as creatorName')
-            .innerJoin('users as u', 'p.creator_id', 'u.id');
+            .select(
+                'posts.id', 
+                'posts.content', 
+                'posts.likes', 
+                'posts.dislikes', 
+                'posts.created_at as createdAt',
+                'posts.updated_at as updatedAt',
+                'posts.creator_id as creatorId',
+                'users.name as creatorName'
+            )
+            .innerJoin('users', 'users.id', '=', 'posts.creator_id');
         
         return post
     };
 
     public async getPostById(id:string):Promise<GetPostByIdDB>{
         const [post]: GetPostByIdDB[] = await super.findById(id);
-
+        
         return post
     }
 

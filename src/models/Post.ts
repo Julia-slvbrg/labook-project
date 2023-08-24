@@ -91,10 +91,10 @@ export interface GetPostDB{
 
 export interface GetPostByIdDB{
     id: string,
-    creatorId: string,
+    creator_id: string,
     content: string,
     likes: number,
     dislikes: number,
-    createdAt: string,
-    updatedAt: string
+    created_at: string,
+    updated_at: string
 }
