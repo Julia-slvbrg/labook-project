@@ -32,7 +32,7 @@ For the posts, the API allows you to create, fetch, edit, delete, like and disli
   
 ## Demonstration
 
-
+https://github.com/Julia-slvbrg/labook-project/assets/114543081/1e5bfbe7-4180-4bbd-b31f-275b49bbca00
 
 ## How to run
 ```bash
