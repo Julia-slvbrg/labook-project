@@ -45,7 +45,7 @@ export class UserBusiness{
         return users
     };
 
-    public signUp = async (input:SignupInputDTO):Promise<SignupOutputDTO> => {
+    public signup = async (input:SignupInputDTO):Promise<SignupOutputDTO> => {
         const {name, email, password} = input;
         
         const checkUserEmail = await this.userDatabase.findEmail(email);

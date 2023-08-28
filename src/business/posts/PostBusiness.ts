@@ -5,7 +5,7 @@ import { GetPostInputDTO, GetPostOutputDTO } from "../../dtos/post/getPost.dto";
 import { UpdatePostInputDTO, UpdatePostOutputDTO } from "../../dtos/post/updatePost.dto";
 import { BadRequestError } from "../../errors/BadRequestError";
 import { NotFoundError } from "../../errors/NotFoundError";
-import { GetPostByIdDB, Post } from "../../models/Post";
+import { Post } from "../../models/Post";
 import { USER_ROLES } from "../../models/User";
 import { IdGenerator } from "../../services/IdGenerator";
 import { TokenManager } from "../../services/TokenManager";

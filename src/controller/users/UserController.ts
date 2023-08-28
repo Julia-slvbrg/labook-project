@@ -34,7 +34,7 @@ export class UserController{
         }
     };
 
-    public signUp = async (req: Request, res: Response) => {
+    public signup = async (req: Request, res: Response) => {
         try {
             const input = SignupSchema.parse({
                 name: req.body.name,
@@ -42,7 +42,7 @@ export class UserController{
                 password: req.body.password
             });
 
-            const result = await this.userBusiness.signUp(input);
+            const result = await this.userBusiness.signup(input);
 
             res.status(201).send(result)
         } catch (error) {
