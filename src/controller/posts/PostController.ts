@@ -6,6 +6,7 @@ import { ZodError } from "zod";
 import { GetPostSchema } from "../../dtos/post/getPost.dto";
 import { UpdatePostSchema } from "../../dtos/post/updatePost.dto";
 import { DeletePostSchema } from "../../dtos/post/deletePost.dto";
+import { LikeDislikePostSchema } from "../../dtos/post/likeDislikePost.dto";
 
 export class PostController{
     constructor(
@@ -93,6 +94,30 @@ export class PostController{
             await this.postBusiness.deletePost(input);
             
             res.status(200).send()
+        } catch (error) {
+            console.log(error)
+
+            if(error instanceof ZodError){
+                res.status(400).send(error.issues)
+            }else if(error instanceof BaseError){
+                res.status(error.statusCode).send(error.message)
+            }else{
+                res.status(500).send('Unexpected error.')
+            }
+        }
+    };
+
+    public likeDislikePost = async (req:Request, res:Response) => {
+        try {
+            const input = LikeDislikePostSchema.parse({
+                id: req.params.id,
+                token: req.headers.authorization,
+                like: req.body.like
+            });
+
+            await this.postBusiness.likeDislikePost(input);
+
+            res.status(200).send();
         } catch (error) {
             console.log(error)
 

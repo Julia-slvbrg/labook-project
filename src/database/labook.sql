@@ -26,7 +26,7 @@ DROP TABLE posts;
 
 CREATE TABLE IF NOT EXISTS likes_dislikes(
     user_id TEXT NOT NULL,
-    post_id TEXT PRIMARY KEY UNIQUE NOT NULL,
+    post_id TEXT NOT NULL,
     like INTEGER NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
         ON UPDATE CASCADE
@@ -47,3 +47,11 @@ DROP TABLE users;
 UPDATE users
 SET user_role = 'ADMIN'
 WHERE id = 'b9214f03-b656-4367-b244-f8e348ded26e';
+
+INSERT INTO likes_dislikes(user_id, post_id, like)
+VALUES( '4fe8aa76-0eea-497f-bacb-f95b0f1d2981', '4d2dd78a-2159-4edd-84a2-f86b0c879286', 1);
+
+
+UPDATE posts
+SET likes = 1
+WHERE id = '4d2dd78a-2159-4edd-84a2-f86b0c879286';

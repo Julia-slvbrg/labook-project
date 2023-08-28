@@ -1,4 +1,3 @@
-import { log } from "console";
 import { PostDatabase } from "../../database/posts/PostDatabase";
 import { CreatePostInputDTO, CreatePostOutputDTO } from "../../dtos/post/createPost.dto";
 import { DeletePostInputDTO } from "../../dtos/post/deletePost.dto";
@@ -10,10 +9,14 @@ import { GetPostByIdDB, Post } from "../../models/Post";
 import { USER_ROLES } from "../../models/User";
 import { IdGenerator } from "../../services/IdGenerator";
 import { TokenManager } from "../../services/TokenManager";
+import { LikeDislikePostInputDTO } from "../../dtos/post/likeDislikePost.dto";
+import { LikesDislikesDatabase } from "../../database/likesDislikes/LikesDislikesDatabase";
+import { LikeDislikeCountDB, LikesDislikes, LikesDislikesDB } from "../../models/LikesDislikes";
 
 export class PostBusiness{
     constructor(
         private postDatabase: PostDatabase,
+        private likesDislikesDatabase: LikesDislikesDatabase,
         private idGenerator: IdGenerator,
         private tokenManager: TokenManager
     ){}
@@ -140,5 +143,110 @@ export class PostBusiness{
         };
 
         await this.postDatabase.deletePost(id);
+    };
+
+    public likeDislikePost = async (input:LikeDislikePostInputDTO):Promise<void> => {
+        const { id, token, like } = input;
+
+        const payload = this.tokenManager.getPayload(token);
+
+        if(!payload){
+            throw new BadRequestError('"token" is required.')
+        };
+
+        const checkPostId = await this.postDatabase.getPostById(id);
+
+        if(!checkPostId){
+            throw new NotFoundError('Post not found.')
+        };
+
+        const [checkLikeDislike] = await this.likesDislikesDatabase.getLike(payload.id, id);
+
+        if(!checkLikeDislike){
+
+            console.log('criando a tabela')
+            const newLikeDislike: LikesDislikesDB = {
+                user_id: payload.id,
+                post_id:id,
+                like: like? 1 : 0
+            };
+
+            await this.likesDislikesDatabase.createPost(newLikeDislike);
+
+            console.log('alterando a contagem')
+            const newLikeDislikeCount: LikeDislikeCountDB = {
+                newLikeCount: like? checkPostId.likes + 1 : checkPostId.likes,
+                newDislikeCount: like? checkPostId.dislikes : checkPostId.dislikes + 1
+            };
+
+            await this.postDatabase.editLikes(checkPostId.id, newLikeDislikeCount)
+
+            return
+        };
+
+        const likeDislikeDB = new LikesDislikes(
+            checkLikeDislike.user_id,
+            checkLikeDislike.post_id,
+            checkLikeDislike.like
+        );
+
+        const postDB = await this.postDatabase.getPostById(likeDislikeDB.getPostId())
+        
+        if(checkLikeDislike.like === 1 && like){
+            
+            await this.likesDislikesDatabase.deletePost(likeDislikeDB.getUserId(), likeDislikeDB.getPostId());
+
+            const newLikeDislikeCount: LikeDislikeCountDB = {
+                newLikeCount: postDB.likes - 1,
+                newDislikeCount: postDB.dislikes
+            };
+
+            await this.postDatabase.editLikes(likeDislikeDB.getPostId(), newLikeDislikeCount);
+
+            return
+        };
+
+        if(checkLikeDislike.like === 1 && !like){
+
+            await this.likesDislikesDatabase.editPost(likeDislikeDB.getPostId(), 0);
+
+            const newLikeDislikeCount: LikeDislikeCountDB = {
+                newLikeCount: postDB.likes - 1,
+                newDislikeCount: postDB.dislikes + 1
+            };
+
+            await this.postDatabase.editLikes(likeDislikeDB.getPostId(), newLikeDislikeCount);
+
+            return
+        };
+
+        if(checkLikeDislike.like === 0 && like){
+            
+            await this.likesDislikesDatabase.editPost(likeDislikeDB.getPostId(), 1);
+
+            const newLikeDislikeCount: LikeDislikeCountDB = {
+                newLikeCount: postDB.likes + 1,
+                newDislikeCount: postDB.dislikes - 1
+            };
+
+            await this.postDatabase.editLikes(likeDislikeDB.getPostId(), newLikeDislikeCount);
+
+            return
+
+        };
+
+        if(checkLikeDislike.like === 0 && !like){
+          
+            await this.likesDislikesDatabase.deletePost(likeDislikeDB.getUserId(), likeDislikeDB.getPostId());
+
+            const newLikeDislikeCount: LikeDislikeCountDB = {
+                newLikeCount: postDB.likes,
+                newDislikeCount: postDB.dislikes - 1
+            };
+
+            await this.postDatabase.editLikes(likeDislikeDB.getPostId(), newLikeDislikeCount);
+
+            return
+        }
     }
 }

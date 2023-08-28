@@ -8,20 +8,22 @@ export class LikesDislikes{
     public getUserId():string{
         return this.userId
     };
-    public setUserId(userId:string){
-        this.userId = userId
-    };
     public getPostId():string{
         return this.postId
-    };
-    public setPostId(postId:string){
-        this.postId = postId
     };
     public getLike():number{
         return this.like
     };
     public setLike(like:number){
         this.like = like
+    }
+
+    public likeDisliketoDBModel():LikesDislikesDB{
+        return{
+            user_id: this.userId,
+            post_id: this.postId,
+            like: this.like
+        }
     }
 };
 
@@ -30,3 +32,9 @@ export interface LikesDislikesDB{
     post_id: string,
     like: number
 };
+
+export interface LikeDislikeCountDB{
+    newLikeCount: number,
+    newDislikeCount: number
+}
+
