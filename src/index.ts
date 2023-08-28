@@ -16,7 +16,7 @@ app.listen(process.env.PORT || 3003, () => {
 });
 
 //USERS
-app.use('/users', userRouter)
+app.use('/users', userRouter);
 
 //POSTS
-app.use('/posts', postRouter)
+app.use('/posts', postRouter);
